@@ -2,9 +2,9 @@
 const instructions = [
     {
         text: "Move forward",
-        act: ()=>{
+        act: () => {
             arrow.x += 50 * Math.sin(arrow.angle);
-            arrow.y += 50 * Math.cos(arrow.angle)
+            arrow.y += 50 * Math.cos(arrow.angle);
         }
     },
     {
@@ -13,44 +13,45 @@ const instructions = [
     {
         text: "Turn 90deg anti-clockwise",
     }
-]
-
-const lookup = {}
-for (const ins of instructions) {
-    lookup[ins.text] = ins;
-}
+];
 
 // ELEMENTS //
-const inventoryPanel = document.getElementById("inventory")
-const algorithmPanel = document.getElementById("algorithm")
-const spacePanel = document.getElementById("space")
-const canvas = document.querySelector("canvas")
+const inventoryPanel = document.getElementById("inventory");
+const algorithmPanel = document.getElementById("algorithm");
+const spacePanel = document.getElementById("space");
+const canvas = document.querySelector("canvas");
 const ctx = canvas.getContext("2d");
-const arrowElement = document.getElementById("arrow")
+const arrowElement = document.getElementById("arrow");
 
-let dragging = null;
+let insDraggingElem = null;
+let insDraggingX = 0;
+let insDraggingY = 0;
+let insDragging = null;
 
 // UI SETUP //
-let nextId = 0;
-for (const ins of instructions) {
-    const div = document.createElement("div");
-    div.classList.add("instruction")
-    div.innerText = ins.text;
-    inventoryPanel.appendChild(div);
+for (let i = 0; i < instructions.length; i++) {
+    const ins = instructions[i];
 
-    div.addEventListener("mousedown",event=>{
-        dragging = document.createElement("div");
-        dragging.classList.add("instruction");
-        dragging.classList.add("dragging");
-        dragging.innerText = ins.text;
+    const insCreator = document.createElement("div");
+    insCreator.classList.add("ins-creator");
+    insCreator.innerText = ins.text;
+    inventoryPanel.appendChild(insCreator);
 
-        dragging.id = "i" + (nextId++)
-        dragging.dataset.ins = ins.text;
-        dragging.style.left = event.clientX + "px";
-        dragging.style.top = event.clientY + "px";
-        
-        document.body.appendChild(dragging);
-    })
+    insCreator.addEventListener("mousedown", event => {
+        insDraggingElem = document.createElement("div");
+        insDraggingElem.classList.add("ins-dragging");
+        insDraggingElem.innerText = ins.text;
+        insDragging = ins;
+
+        const rect = insCreator.getBoundingClientRect();
+        insDraggingX = event.clientX - rect.x;
+        insDraggingY = event.clientY - rect.y;
+
+        insDraggingElem.style.left = (event.clientX - insDraggingX) + "px";
+        insDraggingElem.style.top = (event.clientY - insDraggingY) + "px";
+
+        document.body.appendChild(insDraggingElem);
+    });
 }
 
 // CANVAS SETUP //
@@ -61,7 +62,7 @@ const arrow = {
     x: 0,
     y: 0,
     angle: 0,
-}
+};
 
 function reset() {
     const rect = canvas.getBoundingClientRect();
@@ -71,12 +72,12 @@ function reset() {
     canvas.height = height;
 
     const uiLeftWidth = inventoryPanel.getBoundingClientRect().width + algorithmPanel.getBoundingClientRect().width;
-    arrow.x = uiLeftWidth + (width-uiLeftWidth)/2
-    arrow.y = height/2;
+    arrow.x = uiLeftWidth + (width - uiLeftWidth) / 2;
+    arrow.y = height / 2;
 
     arrow.oldX = arrow.x;
     arrow.oldY = arrow.y;
-    
+
     arrow.angle = 0;
 
     render();
@@ -85,45 +86,36 @@ function reset() {
 function render() {
     arrowElement.style.left = arrow.x + "px";
     arrowElement.style.top = arrow.y + "px";
-    arrowElement.style.transform = `rotate(${arrow.angle}deg)`
+    arrowElement.style.transform = `rotate(${arrow.angle}deg)`;
 
-    ctx.strokeStyle = "black"
+    ctx.strokeStyle = "black";
     ctx.beginPath();
     ctx.moveTo(arrow.oldX, arrow.oldY);
     ctx.lineTo(arrow.x, arrow.y);
     ctx.stroke();
 }
 
-document.body.addEventListener("mousemove", event=>{
-    if (dragging) {
-        dragging.style.left = event.clientX + "px";
-        dragging.style.top = event.clientY + "px";
+document.body.addEventListener("mousemove", event => {
+    if (insDraggingElem) {
+        insDraggingElem.style.left = (event.clientX - insDraggingX) + "px";
+        insDraggingElem.style.top = (event.clientY - insDraggingY) + "px";
     }
-})
+});
 
-document.body.addEventListener("mouseup", event=> {
-    if (dragging ) {
-        const slot = document.elementFromPoint(event.clientX,event.clientY)
-        if (!slot.classList.contains("slot")) {
-            dragging.remove()
-            return
+document.body.addEventListener("mouseup", event => {
+    if (insDraggingElem) {
+        insDraggingElem.remove();
+        insDraggingElem = null;
+
+        const slot = document.elementFromPoint(event.clientX, event.clientY);
+        if (!slot.classList.contains("ins-slot")) {
+            return;
         }
 
-        if (slot.dataset.ins) {
-            document.getElementById(slot.dataset.ins).remove();
-        }
-
-        slot.dataset.ins = dragging.id;
-
-        slot.appendChild(dragging)
-
-        dragging.classList.remove("dragging")
-        dragging.style.top = "0px";
-        dragging.style.left = "0px";
-
-        dragging = null;
+        slot.innerText = insDragging.text;
+        slot.dataset.ins = insDragging.text;
     }
-})
+});
 
 // MAIN //
 reset();
