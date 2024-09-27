@@ -8,10 +8,51 @@ const instructions = [
         }
     },
     {
+        text: "Move forward a small amount",
+        act: () => {
+            arrow.x += 20 * Math.sin(arrow.angle);
+            arrow.y += 20 * Math.cos(arrow.angle);
+        }
+    },
+    {
         text: "Turn 90deg clockwise",
+        act: ()=>{
+            arrow.angle += Math.PI/2;
+        }
     },
     {
         text: "Turn 90deg anti-clockwise",
+        act: ()=>{
+            arrow.angle -= Math.PI/2;
+        }
+    },
+    {
+        text: "Turn 10deg clockwise",
+        act: ()=>{
+            arrow.angle += (Math.PI/2)/9;
+        }
+    },
+    {
+        text: "Turn 10deg anti-clockwise",
+        act: ()=>{
+            arrow.angle -= (Math.PI/2)/9;
+        }
+    },
+    {
+        text: "Draw a circle",
+        act: () => {
+            ctx.beginPath();
+            ctx.arc(arrow.x, arrow.y, 20, 0, Math.PI*2)
+            ctx.stroke();
+        }
+    },
+    {
+        text: "Flip a coin. If heads, skip the next step",
+        act: () => {
+            if (Math.random()< 0.5) {
+                step++
+            }
+        }
     }
 ];
 
@@ -124,7 +165,7 @@ function reset() {
 function render() {
     arrowElement.style.left = arrow.x + "px";
     arrowElement.style.top = arrow.y + "px";
-    arrowElement.style.transform = `rotate(${arrow.angle}deg)`;
+    arrowElement.style.transform = `rotate(${arrow.angle}rad)`;
 
     ctx.strokeStyle = "black";
     ctx.beginPath();
@@ -162,6 +203,7 @@ document.body.addEventListener("mouseup", event => {
 let mode = "idle"
 let step = 0
 let active
+const time = 400
 
 playButton.addEventListener("click", event=>{
     if (mode == "idle") {
@@ -221,14 +263,14 @@ function doStep() {
     // clear active 
     setTimeout(()=>{
         slot.style.background = "";
-    }, 1000)
+    }, time)
 
     // next step
     step ++;
 
     // line up next event
     if (mode != "idle") {
-        active = setTimeout(doStep, 1000)
+        active = setTimeout(doStep, time)
     }
 
 
