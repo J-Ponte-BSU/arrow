@@ -212,7 +212,7 @@ function onModeChange() {
     playButton.classList.remove("active");
     loopButton.classList.remove("active");
     if (mode == "play") {
-        playButton.classList.add("active")
+        playButton.classList.add("active");
         time = 1000;
     }
     if (mode == "loop") {
@@ -300,6 +300,30 @@ function doStep() {
 
 }
 
-
 // MAIN //
 reset();
+
+// URL TOGGLE //
+const url = document.getElementById("url");
+let urlOpen = false;
+
+function updateURL() {
+    if (urlOpen) {
+        url.style.opacity = "100%";
+        inventoryPanel.style.paddingTop = "3.5em";
+        algorithmPanel.style.paddingTop = "3.5em";
+    } else {
+        url.style.opacity = "0%";
+        inventoryPanel.style.paddingTop = null;
+        algorithmPanel.style.paddingTop = null;
+    }
+}
+
+document.body.addEventListener("keypress", event => {
+    if (event.code == "Space") {
+        urlOpen = !urlOpen;
+        updateURL();
+    }
+});
+
+updateURL();
