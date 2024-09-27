@@ -19,6 +19,7 @@ body {
     font-size: 1.4em;
     opacity: 0%;
     transition: 0.5s opacity;
+    pointer-events: none;
 }
 
 #ui,
