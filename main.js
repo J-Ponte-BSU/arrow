@@ -3,15 +3,15 @@ const instructions = [
     {
         text: "Move forward",
         act: () => {
-            arrow.x += 50 * Math.sin(arrow.angle);
-            arrow.y += 50 * Math.cos(arrow.angle);
+            arrow.x += 50 * Math.cos(arrow.angle);
+            arrow.y += 50 * Math.sin(arrow.angle);
         }
     },
     {
         text: "Move forward a small amount",
         act: () => {
-            arrow.x += 20 * Math.sin(arrow.angle);
-            arrow.y += 20 * Math.cos(arrow.angle);
+            arrow.x += 20 * Math.cos(arrow.angle);
+            arrow.y += 20 * Math.sin(arrow.angle);
         }
     },
     {
@@ -157,7 +157,7 @@ function reset() {
     arrow.oldX = arrow.x;
     arrow.oldY = arrow.y;
 
-    arrow.angle = 0;
+    arrow.angle = Math.PI/2;
 
     render();
 }
@@ -167,7 +167,8 @@ function render() {
     arrowElement.style.top = arrow.y + "px";
     arrowElement.style.transform = `rotate(${arrow.angle}rad)`;
 
-    ctx.strokeStyle = "black";
+    ctx.strokeStyle = "blue";
+    ctx.lineWidth = 4;
     ctx.beginPath();
     ctx.moveTo(arrow.oldX, arrow.oldY);
     ctx.lineTo(arrow.x, arrow.y);
@@ -201,17 +202,33 @@ document.body.addEventListener("mouseup", event => {
 
 // CONTROLS //
 let mode = "idle"
+onModeChange();
 let step = 0
 let active
-const time = 400
+let time = 400
+
+function onModeChange() {
+
+    playButton.classList.remove("active")
+    loopButton.classList.remove("active")
+    if (mode == "play") {playButton.classList.add("active")
+        ;
+    time = 1000;
+    }
+    if (mode == "loop") {loopButton.classList.add("active");
+        time = 333;
+    }
+}
 
 playButton.addEventListener("click", event=>{
     if (mode == "idle") {
         step = 0;
         mode = "play"
+        onModeChange();
         doStep()
     } else {
         mode = "idle";
+        onModeChange();
         if (active) clearTimeout(active)
     }
 })
@@ -220,17 +237,21 @@ loopButton.addEventListener("click", event=>{
     if (mode == "idle") {
         step = 0;
         mode = "loop"
+        onModeChange();
         doStep();
     } else if (mode == "play") {
         mode = "loop"
+        onModeChange();
     } else if (mode == "loop") {
         mode = "idle"
+        onModeChange();
         if (active) clearTimeout(active)
     }
 })
 
 resetButton.addEventListener("click", event=>{
     mode = "idle"
+    onModeChange();
     if (active) clearTimeout(active)
     reset();
 })
@@ -241,6 +262,7 @@ function doStep() {
     // stop loop if no ins
     if (slots.length == 0) {
         mode = "idle"
+        onModeChange();
         return
     }
 
@@ -248,6 +270,7 @@ function doStep() {
     if (step >= slots.length) {
         if (mode == "play") {
             mode = "idle"
+            onModeChange();
             return
         } else {
             step = 0;
@@ -256,13 +279,13 @@ function doStep() {
 
     // execute step
     const slot = slots[step]
-    slot.style.background = "blue"
+    slot.classList.add("active")
     const ins = lookup[slot.dataset.ins]
     if (ins.act) {ins.act(); render()}
 
     // clear active 
     setTimeout(()=>{
-        slot.style.background = "";
+        slot.classList.remove("active")
     }, time)
 
     // next step
