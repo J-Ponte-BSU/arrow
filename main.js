@@ -15,6 +15,12 @@ const instructions = [
     }
 ];
 
+const lookup = {}
+
+for (const ins of instructions) {
+    lookup[ins.text] = ins;
+}
+
 // ELEMENTS //
 const inventoryPanel = document.getElementById("inventory");
 const algorithmPanel = document.getElementById("algorithm");
@@ -51,6 +57,34 @@ for (let i = 0; i < instructions.length; i++) {
         insDraggingElem.style.top = (event.clientY - insDraggingY) + "px";
 
         document.body.appendChild(insDraggingElem);
+    });
+}
+
+for (const slot of document.querySelectorAll(".ins-slot")) {
+    slot.addEventListener("mousedown", event => {
+        if (!slot.dataset.ins) {
+            return
+        }
+        
+        const ins = lookup[slot.dataset.ins];
+
+        insDraggingElem = document.createElement("div");
+        insDraggingElem.classList.add("ins-dragging");
+        insDraggingElem.innerText = ins.text;
+        insDragging = ins;
+
+        const rect = slot.getBoundingClientRect();
+        insDraggingX = event.clientX - rect.x;
+        insDraggingY = event.clientY - rect.y;
+
+        insDraggingElem.style.left = (event.clientX - insDraggingX) + "px";
+        insDraggingElem.style.top = (event.clientY - insDraggingY) + "px";
+
+        document.body.appendChild(insDraggingElem);
+
+        delete slot.dataset.ins;
+        slot.innerText = null;
+
     });
 }
 
