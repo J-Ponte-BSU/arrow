@@ -29,6 +29,10 @@ const canvas = document.querySelector("canvas");
 const ctx = canvas.getContext("2d");
 const arrowElement = document.getElementById("arrow");
 
+const playButton = document.getElementById("play");
+const loopButton = document.getElementById("loop");
+const resetButton = document.getElementById("reset");
+
 let insDraggingElem = null;
 let insDraggingX = 0;
 let insDraggingY = 0;
@@ -127,6 +131,9 @@ function render() {
     ctx.moveTo(arrow.oldX, arrow.oldY);
     ctx.lineTo(arrow.x, arrow.y);
     ctx.stroke();
+
+    arrow.oldX = arrow.x
+    arrow.oldY = arrow.y
 }
 
 document.body.addEventListener("mousemove", event => {
@@ -150,6 +157,83 @@ document.body.addEventListener("mouseup", event => {
         slot.dataset.ins = insDragging.text;
     }
 });
+
+// CONTROLS //
+let mode = "idle"
+let step = 0
+let active
+
+playButton.addEventListener("click", event=>{
+    if (mode == "idle") {
+        step = 0;
+        mode = "play"
+        doStep()
+    } else {
+        mode = "idle";
+        if (active) clearTimeout(active)
+    }
+})
+
+loopButton.addEventListener("click", event=>{
+    if (mode == "idle") {
+        step = 0;
+        mode = "loop"
+        doStep();
+    } else if (mode == "play") {
+        mode = "loop"
+    } else if (mode == "loop") {
+        mode = "idle"
+        if (active) clearTimeout(active)
+    }
+})
+
+resetButton.addEventListener("click", event=>{
+    mode = "idle"
+    if (active) clearTimeout(active)
+    reset();
+})
+
+function doStep() {
+    const slots = document.querySelectorAll(".ins-slot[data-ins]")
+
+    // stop loop if no ins
+    if (slots.length == 0) {
+        mode = "idle"
+        return
+    }
+
+    // stop or loop at end of sequence
+    if (step >= slots.length) {
+        if (mode == "play") {
+            mode = "idle"
+            return
+        } else {
+            step = 0;
+        }
+    }
+
+    // execute step
+    const slot = slots[step]
+    slot.style.background = "blue"
+    const ins = lookup[slot.dataset.ins]
+    if (ins.act) {ins.act(); render()}
+
+    // clear active 
+    setTimeout(()=>{
+        slot.style.background = "";
+    }, 1000)
+
+    // next step
+    step ++;
+
+    // line up next event
+    if (mode != "idle") {
+        active = setTimeout(doStep, 1000)
+    }
+
+
+}
+
 
 // MAIN //
 reset();
