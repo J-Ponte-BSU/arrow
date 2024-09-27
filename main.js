@@ -15,25 +15,25 @@ const instructions = [
         }
     },
     {
-        text: "Turn 90deg clockwise",
+        text: "Turn 90° clockwise",
         act: () => {
             arrow.angle += Math.PI / 2;
         }
     },
     {
-        text: "Turn 90deg anti-clockwise",
+        text: "Turn 90° anti-clockwise",
         act: () => {
             arrow.angle -= Math.PI / 2;
         }
     },
     {
-        text: "Turn 10deg clockwise",
+        text: "Turn 10° clockwise",
         act: () => {
             arrow.angle += (Math.PI / 2) / 9;
         }
     },
     {
-        text: "Turn 10deg anti-clockwise",
+        text: "Turn 10° anti-clockwise",
         act: () => {
             arrow.angle -= (Math.PI / 2) / 9;
         }
