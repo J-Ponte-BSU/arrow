@@ -15,6 +15,11 @@ const instructions = [
     }
 ]
 
+const lookup = {}
+for (const ins of instructions) {
+    lookup[ins.text] = ins;
+}
+
 // ELEMENTS //
 const inventoryPanel = document.getElementById("inventory")
 const algorithmPanel = document.getElementById("algorithm")
@@ -23,12 +28,29 @@ const canvas = document.querySelector("canvas")
 const ctx = canvas.getContext("2d");
 const arrowElement = document.getElementById("arrow")
 
+let dragging = null;
+
 // UI SETUP //
+let nextId = 0;
 for (const ins of instructions) {
     const div = document.createElement("div");
     div.classList.add("instruction")
     div.innerText = ins.text;
     inventoryPanel.appendChild(div);
+
+    div.addEventListener("mousedown",event=>{
+        dragging = document.createElement("div");
+        dragging.classList.add("instruction");
+        dragging.classList.add("dragging");
+        dragging.innerText = ins.text;
+
+        dragging.id = "i" + (nextId++)
+        dragging.dataset.ins = ins.text;
+        dragging.style.left = event.clientX + "px";
+        dragging.style.top = event.clientY + "px";
+        
+        document.body.appendChild(dragging);
+    })
 }
 
 // CANVAS SETUP //
@@ -71,6 +93,37 @@ function render() {
     ctx.lineTo(arrow.x, arrow.y);
     ctx.stroke();
 }
+
+document.body.addEventListener("mousemove", event=>{
+    if (dragging) {
+        dragging.style.left = event.clientX + "px";
+        dragging.style.top = event.clientY + "px";
+    }
+})
+
+document.body.addEventListener("mouseup", event=> {
+    if (dragging ) {
+        const slot = document.elementFromPoint(event.clientX,event.clientY)
+        if (!slot.classList.contains("slot")) {
+            dragging.remove()
+            return
+        }
+
+        if (slot.dataset.ins) {
+            document.getElementById(slot.dataset.ins).remove();
+        }
+
+        slot.dataset.ins = dragging.id;
+
+        slot.appendChild(dragging)
+
+        dragging.classList.remove("dragging")
+        dragging.style.top = "0px";
+        dragging.style.left = "0px";
+
+        dragging = null;
+    }
+})
 
 // MAIN //
 reset();
